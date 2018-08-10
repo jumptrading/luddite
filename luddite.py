@@ -28,7 +28,8 @@ __version__ = "1.0.0"
 
 
 DEFAULT_FNAME = "requirements.txt"
-DEFAULT_INDEX_PYPI = "https://pypi.org/pypi/"
+DEFAULT_PIP_INDEX = os.environ.get("PIP_INDEX_URL", "https://pypi.org/pypi/")
+DEFAULT_INDEX = os.environ.get("LUDDITE_DEFAULT_INDEX", DEFAULT_PIP_INDEX)
 
 ANSI_COLORS = {
     None: "\x1b[0m",  # actually black but whatevs
@@ -85,19 +86,19 @@ def json_get(url, headers=(("Accept", "application/json"),)):
     return data
 
 
-def get_data_pypi(name, index=DEFAULT_INDEX_PYPI):
+def get_data_pypi(name, index=DEFAULT_INDEX):
     uri = "{}/{}/json".format(index.rstrip("/"), name.split("[")[0])
     data = json_get(uri)
     return data
 
 
-def get_versions_pypi(name, index=DEFAULT_INDEX_PYPI):
+def get_versions_pypi(name, index=DEFAULT_INDEX):
     data = get_data_pypi(name, index)
     version_numbers = sorted(data["releases"], key=parse_version)
     return tuple(version_numbers)
 
 
-def get_version_pypi(name, index=DEFAULT_INDEX_PYPI):
+def get_version_pypi(name, index=DEFAULT_INDEX):
     latest = get_data_pypi(name, index)["info"]["version"]
     return latest
 
@@ -128,7 +129,7 @@ def get_version_devpi(name, index):
     return latest
 
 
-def get_index_url(default=DEFAULT_INDEX_PYPI):
+def get_index_url(default=DEFAULT_INDEX):
     args = [sys.executable] + "-m pip config get global.index-url".split()
     with open(os.devnull, "w") as shh:
         try:
@@ -183,8 +184,9 @@ class RequirementsLine(object):
     def __init__(self, text, line_number=None):
         self.text = text
         self.line_number = line_number
-        line, sep, comment = text.partition("#")  # todo: handle URL fragment properly
-        self.stripped = line.strip()
+        line, _sep, _comment = text.partition(" #")
+        line = line.strip()
+        self.stripped = "" if line.startswith("#") else line
         self.req = None
         self.version = None
         self.from_versions = ""
@@ -203,9 +205,15 @@ class RequirementsLine(object):
         self.latest_non_pre = None
 
     def is_index(self):
-        # TODO: handle --index-url=val properly
-        if "--ind" in self.stripped or self.stripped.startswith("-i "):
-            return self.stripped.split()[1]
+        parts = self.stripped.split()
+        for pre in "-i", "--index", "--index-url":
+            if pre in parts:
+                return parts[parts.index(pre) + 1]
+        for pre in "--index=", "--index-url=":
+            for part in parts:
+                if part.startswith(pre):
+                    return part[len(pre):]
+
 
     def process(self, worker, index=None):
         if not self.stripped or self.is_index():
@@ -237,7 +245,7 @@ class RequirementsLine(object):
 
 
 class RequirementsFile(object):
-    def __init__(self, fname=DEFAULT_FNAME):
+    def __init__(self, fname):
         self.fname = fname
         self.lines = self.parse()
         self.width = max(len(line.text) for line in self.lines)
@@ -288,8 +296,8 @@ def main():
     parser = argparse.ArgumentParser(description="Luddite checks for out-of-date package versions")
     parser.add_argument("fname", nargs="?", default=DEFAULT_FNAME, metavar="<requirements.txt>")
     parser.add_argument("-i", "--index-url", metavar="<url>")
-    parser.add_argument("-v", "--version", action="version", version=version_str)
     parser.add_argument("-n", "--n-threads", type=int, default=4, metavar="<N>")
+    parser.add_argument("-v", "--version", action="version", version=version_str)
     args = parser.parse_args()
     luddite = Luddite(fname=args.fname, index=args.index_url)
     luddite.run(n_threads=args.n_threads)

@@ -26,8 +26,6 @@ setup(
             "pytest-cov",
             "pytest-mock",
             "pytest-socket",
-            "requests-mock",
-            "wimpy",
         ],
     },
 )

@@ -1,11 +1,11 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
+import os
 import sys
 from subprocess import CalledProcessError
 
 import pytest
-import wimpy
 
 import luddite
 
@@ -240,8 +240,8 @@ def test_integration(tmpdir, capsys, mocker):
 """
     )
 
-    with wimpy.working_directory(tmpdir):
-        luddite.main()
+    os.chdir(str(tmpdir))
+    luddite.main()
 
     out, err = capsys.readouterr()
     assert err == ""

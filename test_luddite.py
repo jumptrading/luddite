@@ -105,7 +105,7 @@ def test_parse_reqs_file_with_index(tmpdir):
 
 def test_parse_reqs_file_with_two_indices(tmpdir):
     reqs = tmpdir.join("reqs.txt")
-    reqs.write("-i http://myindex\n--index-url http://anotherindexwtf\nabc==1.0\ndef==2.0")
+    reqs.write("-i http://myindex\n--index-url=http://anotherindexwtf\nabc==1.0\ndef==2.0")
     file = luddite.RequirementsFile(reqs)
     with pytest.raises(luddite.MultipleIndicesError):
         file.index
@@ -161,13 +161,15 @@ def test_autodetect_index_url(mocker, tmpdir):
     assert lud.get_versions is luddite.get_versions_pypi
 
 
-def test_autodetect_index_url_failed(mocker, tmpdir):
+def test_autodetect_index_url_failed(mocker, tmpdir, monkeypatch):
+    monkeypatch.delenv("PIP_INDEX_URL", raising=False)
+    monkeypatch.delenv("LUDDITE_DEFAULT_INDEX", raising=False)
     reqs = tmpdir.join("requirements.txt")
     reqs.write("whatever")
     mocker.patch("luddite.subprocess.check_output", side_effect=CalledProcessError(1, "wtf"))
     mocker.patch("luddite.guess_index_type", return_value="devpi")
     lud = luddite.Luddite(reqs)
-    assert lud.index == luddite.DEFAULT_INDEX_PYPI
+    assert lud.index == luddite.DEFAULT_INDEX == "https://pypi.org/pypi/"
     assert lud.get_versions is luddite.get_versions_devpi
 
 
@@ -240,8 +242,12 @@ def test_integration(tmpdir, capsys, mocker):
 """
     )
 
+    old = os.getcwd()
     os.chdir(str(tmpdir))
-    luddite.main()
+    try:
+        luddite.main()
+    finally:
+        os.chdir(old)
 
     out, err = capsys.readouterr()
     assert err == ""

@@ -22,10 +22,11 @@ setup(
         # https://hynek.me/articles/conditional-python-dependencies/
         ":python_version<'3.2'": ["futures"],
         "dev": [
-            "pytest>=3.0",
+            "pytest>=3.6.3",
             "pytest-cov",
             "pytest-mock",
             "pytest-socket",
+            "coveralls",
         ],
     },
 )

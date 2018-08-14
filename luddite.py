@@ -283,12 +283,12 @@ class Luddite(object):
                 result = future.result()
                 template, color = result_map[result]
                 line_out = line.text.rstrip("\r\n")
-                if result != "noop":
-                    pad = self.req_file.width - len(line_out) + 2
-                    print(line_out, end=" " * pad)
-                    cprint(template.format(**vars(line)), color=color)
-                else:
+                if result == "noop":
                     print(line_out)
+                    continue
+                pad = self.req_file.width - len(line_out) + 2
+                print(line_out, end=" " * pad)
+                cprint(template.format(**vars(line)), color=color)
 
 
 def main():

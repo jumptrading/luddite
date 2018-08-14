@@ -26,6 +26,7 @@ setup(
             "pytest-cov",
             "pytest-mock",
             "pytest-socket",
+            "coveralls",
         ],
     },
 )

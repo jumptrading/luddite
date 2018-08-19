@@ -1,7 +1,6 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
-import os
 import sys
 from subprocess import CalledProcessError
 
@@ -145,9 +144,8 @@ def test_json_get_fails(mocker):
     mock_response.code = 500
     mock_response.read.return_value = b"boom"
     mocker.patch("luddite.urlopen", return_value=mock_response)
-    with pytest.raises(luddite.LudditeError) as cm:
+    with pytest.raises(luddite.LudditeError, match="Unexpected response code 500") as cm:
         luddite.json_get("http://example.org")
-    assert str(cm.value) == "Unexpected response code 500"
     assert cm.value.response_data == b"boom"
 
 
@@ -217,7 +215,7 @@ def test_get_version_pypi(mocker):
     assert v == "0.3"
 
 
-def test_integration(tmpdir, capsys, mocker):
+def test_integration(tmpdir, capsys, mocker, monkeypatch):
     mock_response = mocker.MagicMock()
     mock_response.code = 200
     mock_response.headers.get_content_charset.return_value = "utf-8"
@@ -242,12 +240,8 @@ def test_integration(tmpdir, capsys, mocker):
 """
     )
 
-    old = os.getcwd()
-    os.chdir(str(tmpdir))
-    try:
-        luddite.main()
-    finally:
-        os.chdir(old)
+    monkeypatch.chdir(tmpdir)
+    luddite.main()
 
     out, err = capsys.readouterr()
     assert err == ""

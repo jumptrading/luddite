@@ -10,7 +10,7 @@ luddite
 .. _coveralls: https://coveralls.io/github/jumptrading/luddite?branch=master
 
 .. |pypi| image:: https://img.shields.io/pypi/v/luddite.svg
-.. _pypi: https://pypi.python.org/pypi/luddite
+.. _pypi: https://pypi.org/project/luddite/
 
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/luddite.svg
 .. _pyversions: 

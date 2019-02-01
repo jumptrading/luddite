@@ -24,7 +24,7 @@ else:
     sys.stdout = codecs.getwriter("utf8")(sys.stdout)
 
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 
 DEFAULT_FNAME = "requirements.txt"
@@ -38,6 +38,9 @@ ANSI_COLORS = {
     "yellow": "\x1b[33m",
     "magenta": "\x1b[35m",
 }
+if sys.platform == "win32":
+    import colorama
+    colorama.init(autoreset=True)
 
 
 class LudditeError(Exception):
@@ -213,7 +216,6 @@ class RequirementsLine(object):
             for part in parts:
                 if part.startswith(pre):
                     return part[len(pre):]
-
 
     def process(self, worker, index=None):
         if not self.stripped or self.is_index():

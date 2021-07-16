@@ -1,13 +1,13 @@
 luddite
 =======
 
-|travis|_ |coveralls|_ |pypi|_ |pyversions|_
+|actions|_ |codecov|_ |pypi|_ |pyversions|_
 
-.. |travis| image:: https://img.shields.io/travis/jumptrading/luddite.svg?branch=master
-.. _travis: https://travis-ci.org/jumptrading/luddite
+.. |actions| image:: https://github.com/jumptrading/luddite/actions/workflows/tests.yml/badge.svg
+.. _actions: https://github.com/jumptrading/luddite/actions/workflows/tests.yml/
 
-.. |coveralls| image:: https://img.shields.io/coveralls/jumptrading/luddite.svg
-.. _coveralls: https://coveralls.io/github/jumptrading/luddite?branch=master
+.. |codecov| image:: https://codecov.io/gh/jumptrading/luddite/branch/master/graph/badge.svg
+.. _codecov: https://codecov.io/gh/jumptrading/luddite
 
 .. |pypi| image:: https://img.shields.io/pypi/v/luddite.svg
 .. _pypi: https://pypi.org/project/luddite/

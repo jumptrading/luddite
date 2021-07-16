@@ -196,7 +196,7 @@ class RequirementsLine(object):
         if self.stripped:
             try:
                 self.req = Requirement.parse(self.stripped)
-            except RequirementParseError:
+            except (RequirementParseError, ValueError):
                 pass
             else:
                 if len(self.req.specs) == 1:

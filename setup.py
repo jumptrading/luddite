@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="luddite",
-    version="1.0.1",
+    version="1.0.2",
     author="Wim Glenn",
     author_email="hey@wimglenn.com",
     url="https://github.com/jumptrading/luddite",
@@ -32,4 +32,5 @@ setup(
             "coveralls",
         ],
     },
+    options={"bdist_wheel": {"universal": True}},
 )

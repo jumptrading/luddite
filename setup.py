@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="luddite",
-    version="1.0.2",
+    version="1.0.3",
     author="Wim Glenn",
     author_email="hey@wimglenn.com",
     url="https://github.com/jumptrading/luddite",
@@ -18,14 +18,14 @@ setup(
     ],
     entry_points={"console_scripts": ["luddite=luddite:main"]},
     install_requires=[
-        "setuptools >= 18.0",
+        "packaging",
         'colorama; platform_system == "Windows"',
         'futures; python_version < "3.2"',
     ],
     extras_require={
         # https://hynek.me/articles/conditional-python-dependencies/
         "dev": [
-            "pytest>=3.6.3",
+            "pytest >= 3.6.3",
             "pytest-cov",
             "pytest-mock",
             "pytest-socket",

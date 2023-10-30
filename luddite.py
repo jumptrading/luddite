@@ -8,10 +8,9 @@ import os
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from pkg_resources import parse_version
-from pkg_resources import Requirement
-from pkg_resources import RequirementParseError
 
+from packaging.requirements import Requirement, InvalidRequirement
+from packaging.version import Version
 
 try:
     from urllib2 import Request, urlopen
@@ -97,7 +96,7 @@ def get_data_pypi(name, index=DEFAULT_INDEX):
 
 def get_versions_pypi(name, index=DEFAULT_INDEX):
     data = get_data_pypi(name, index)
-    version_numbers = sorted(data["releases"], key=parse_version)
+    version_numbers = sorted(data["releases"], key=Version)
     return tuple(version_numbers)
 
 
@@ -123,7 +122,7 @@ def get_data_devpi(name, index):
 
 def get_versions_devpi(name, index):
     data = get_data_devpi(name, index)
-    version_numbers = sorted(data["result"], key=parse_version)
+    version_numbers = sorted(data["result"], key=Version)
     return tuple(version_numbers)
 
 
@@ -195,14 +194,14 @@ class RequirementsLine(object):
         self.from_versions = ""
         if self.stripped:
             try:
-                self.req = Requirement.parse(self.stripped)
-            except (RequirementParseError, ValueError):
+                self.req = Requirement(self.stripped)
+            except (InvalidRequirement, ValueError):
                 pass
             else:
-                if len(self.req.specs) == 1:
-                    [(op, v)] = self.req.specs
-                    if op == "==":
-                        self.version = v
+                if len(self.req.specifier) == 1:
+                    spec = str(self.req.specifier)
+                    if spec.startswith("=="):
+                        _, self.version = spec.split("==", 1)
         self.error = None
         self.latest = None
         self.latest_non_pre = None
@@ -236,7 +235,7 @@ class RequirementsLine(object):
             return "gone"
         self.latest = index_versions[-1]
         self.latest_non_pre = max(
-            index_versions, key=lambda v: (not parse_version(v).is_prerelease, parse_version(v))
+            index_versions, key=lambda v: (not Version(v).is_prerelease, Version(v))
         )
         if self.version == self.latest:
             return "pass"

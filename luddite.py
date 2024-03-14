@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
-from __future__ import unicode_literals, print_function
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import argparse
 import json
@@ -9,8 +10,10 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
-from packaging.requirements import Requirement, InvalidRequirement
-from packaging.version import Version, InvalidVersion
+from packaging.requirements import InvalidRequirement
+from packaging.requirements import Requirement
+from packaging.version import InvalidVersion
+from packaging.version import Version
 
 try:
     from urllib2 import Request, urlopen

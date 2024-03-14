@@ -105,7 +105,12 @@ def test_parse_reqs_file_with_index(tmpdir):
 
 def test_parse_reqs_file_with_two_indices(tmpdir):
     reqs = tmpdir.join("reqs.txt")
-    reqs.write("-i http://myindex\n--index-url=http://anotherindexwtf\nabc==1.0\ndef==2.0")
+    reqs.write(
+        "-i http://myindex\n"
+        "--index-url=http://anotherindexwtf\n"
+        "abc==1.0\n"
+        "def==2.0"
+    )
     file = luddite.RequirementsFile(reqs)
     with pytest.raises(luddite.MultipleIndicesError):
         file.index
@@ -183,7 +188,10 @@ def test_guess_index_type_pypi(mocker):
 def test_guess_index_type_devpi(mocker):
     mock_response = mocker.MagicMock()
     mock_response.code = 200
-    mock_response.headers = {"Content-type": "awesomesauce", "X-Devpi-Server-Version": "4.0.0\r\n"}
+    mock_response.headers = {
+        "Content-type": "awesomesauce",
+        "X-Devpi-Server-Version": "4.0.0\r\n",
+    }
     mocker.patch("luddite.urlopen", return_value=mock_response)
     assert luddite.guess_index_type("http://test-index/") == "devpi"
 

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="luddite",
-    version="1.0.3",
+    version="1.0.4",
     author="Wim Glenn",
     author_email="hey@wimglenn.com",
     url="https://github.com/jumptrading/luddite",
@@ -29,7 +29,6 @@ setup(
             "pytest-cov",
             "pytest-mock",
             "pytest-socket",
-            "coveralls",
         ],
     },
     options={"bdist_wheel": {"universal": True}},

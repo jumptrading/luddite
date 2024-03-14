@@ -1,6 +1,7 @@
 # coding: utf-8
 from __future__ import unicode_literals
 
+import json
 import sys
 from subprocess import CalledProcessError
 
@@ -104,7 +105,12 @@ def test_parse_reqs_file_with_index(tmpdir):
 
 def test_parse_reqs_file_with_two_indices(tmpdir):
     reqs = tmpdir.join("reqs.txt")
-    reqs.write("-i http://myindex\n--index-url=http://anotherindexwtf\nabc==1.0\ndef==2.0")
+    reqs.write(
+        "-i http://myindex\n"
+        "--index-url=http://anotherindexwtf\n"
+        "abc==1.0\n"
+        "def==2.0"
+    )
     file = luddite.RequirementsFile(reqs)
     with pytest.raises(luddite.MultipleIndicesError):
         file.index
@@ -182,7 +188,10 @@ def test_guess_index_type_pypi(mocker):
 def test_guess_index_type_devpi(mocker):
     mock_response = mocker.MagicMock()
     mock_response.code = 200
-    mock_response.headers = {"Content-type": "awesomesauce", "X-Devpi-Server-Version": "4.0.0\r\n"}
+    mock_response.headers = {
+        "Content-type": "awesomesauce",
+        "X-Devpi-Server-Version": "4.0.0\r\n",
+    }
     mocker.patch("luddite.urlopen", return_value=mock_response)
     assert luddite.guess_index_type("http://test-index/") == "devpi"
 
@@ -219,7 +228,14 @@ def test_integration(tmpdir, capsys, mocker, monkeypatch):
     mock_response = mocker.MagicMock()
     mock_response.code = 200
     mock_response.headers.get_content_charset.return_value = "utf-8"
-    mock_response.read.return_value = b'{"releases": ["1.0", "1.1", "1.4"]}'
+    releases = {
+        "releases": {
+            "1.0": [{"yanked": False}],
+            "1.1": [{"yanked": False}],
+            "1.4": [{"yanked": False}],
+        }
+    }
+    mock_response.read.return_value = json.dumps(releases).encode()
     mocker.patch("luddite.urlopen", return_value=mock_response)
     mocker.patch("sys.argv", "luddite -i http://index-from-cmdline".split())
 
@@ -264,3 +280,21 @@ def test_integration(tmpdir, capsys, mocker, monkeypatch):
         distextra[x,y]==1.2.3                ! distextra 1.2.3 is not in the index (from versions: 1.0, 1.1, 1.4)
 """
     )
+
+
+def test_yanked_versions_skipped(mocker):
+    mock_response = mocker.MagicMock()
+    mock_response.code = 200
+    releases = {
+        "releases": {
+            "1.1": [{}],
+            "1.4": [{"yanked": False}],
+            "1.3": [{"yanked": True}],
+            "1.2": [{"yanked": False}],
+        }
+    }
+    mock_response.read.return_value = json.dumps(releases).encode()
+    mocker.patch("luddite.urlopen", return_value=mock_response)
+    mocker.patch("luddite.get_charset", return_value="utf-8")
+    vs = luddite.get_versions_pypi("dist", "http://myindex/+simple/")
+    assert vs == ("1.1", "1.2", "1.4")

@@ -10,7 +10,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 
 from packaging.requirements import Requirement, InvalidRequirement
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 
 try:
     from urllib2 import Request, urlopen
@@ -23,7 +23,7 @@ else:
     sys.stdout = codecs.getwriter("utf8")(sys.stdout)
 
 
-__version__ = "1.0.2"
+__version__ = "1.0.4"
 
 
 DEFAULT_FNAME = "requirements.txt"
@@ -94,10 +94,23 @@ def get_data_pypi(name, index=DEFAULT_INDEX):
     return data
 
 
+def _safe_version(v):
+    try:
+        return Version(v)
+    except InvalidVersion:
+        pass
+
+
 def get_versions_pypi(name, index=DEFAULT_INDEX):
     data = get_data_pypi(name, index)
-    version_numbers = sorted(data["releases"], key=Version)
-    return tuple(version_numbers)
+    versions = []
+    for raw_version, details in data["releases"].items():
+        version = _safe_version(raw_version)
+        if version is not None:
+            if any(not d.get("yanked", False) for d in details):
+                versions.append((version, raw_version))
+    versions.sort()
+    return tuple(v for (_, v) in versions)
 
 
 def get_version_pypi(name, index=DEFAULT_INDEX):
@@ -122,8 +135,13 @@ def get_data_devpi(name, index):
 
 def get_versions_devpi(name, index):
     data = get_data_devpi(name, index)
-    version_numbers = sorted(data["result"], key=Version)
-    return tuple(version_numbers)
+    versions = []
+    for raw_version, details in data["result"].items():
+        version = _safe_version(raw_version)
+        if version is not None:
+            versions.append((version, raw_version))
+    versions.sort()
+    return tuple(v for (_, v) in versions)
 
 
 def get_version_devpi(name, index):

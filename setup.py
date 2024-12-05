@@ -8,7 +8,7 @@ setup(
     url="https://github.com/jumptrading/luddite",
     py_modules=["luddite"],
     description="Checks for out-of-date package versions",
-    long_description=open("README.rst").read(),
+    long_description=open("README.md").read(),
     classifiers=[
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 3",

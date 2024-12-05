@@ -2,54 +2,49 @@ name: tests
 
 on:
   push:
-    branches: ["master"]
+    branches: [master]
   pull_request:
-    branches: ["master"]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
   tests-3x:
-    name: "Python ${{ matrix.python-version }}"
-    runs-on: "ubuntu-latest"
+    name: Python ${{ matrix.py-version }}
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        python-version:
+        py-version:
         - "3.8"
         - "3.9"
         - "3.10"
         - "3.11"
         - "3.12"
+        - "3.13"
 
     steps:
-      - uses: "actions/checkout@v3"
-      - uses: "actions/setup-python@v4"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "${{ matrix.python-version }}"
-      - name: "Install dependencies"
-        run: |
-          set -xe
-          python -VV
-          python -m pip install -e .[dev]
-      - name: "Run tests for ${{ matrix.python-version }}"
-        run: python -m pytest
+          py-version: ${{ matrix.py-version }}
+      - name: Install dependencies
+        run: pip install -e .[dev]
+      - name: Run tests for ${{ matrix.py-version }}
+        run: pytest
       - name: Upload coverage to Codecov
-        uses: "codecov/codecov-action@v3"
+        uses: codecov/codecov-action@v5
 
   tests-27:
-    name: "Python 2.7 on ubuntu-20.04"
+    name: Python 2.7 on ubuntu-20.04
     runs-on: ubuntu-20.04
     container:
       image: python:2.7-buster
 
     steps:
-      - uses: "actions/checkout@v3"
-      - name: "Install dependencies"
-        run: |
-          set -xe
-          python -VV
-          python -m pip install -e .[dev]
-      - name: "Run tests for 2.7"
-        run: python -m pytest
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: pip install -e .[dev]
+      - name: Run tests for 2.7
+        run: pytest
       - name: Upload coverage to Codecov
-        uses: "codecov/codecov-action@v3"
+        uses: codecov/codecov-action@v5

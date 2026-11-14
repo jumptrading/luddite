@@ -34,6 +34,21 @@ def test_version_missing_from_index(mocker):
     assert line.process(worker) == "gone"
 
 
+@pytest.mark.parametrize(
+    "pin, versions, expected",
+    [
+        ("1.2.0", ("1.2",), "pass"),
+        ("1.2.0", ("1.2", "1.3a1"), "warn"),
+        ("1.2.0", ("1.2", "1.3"), "fail"),
+        ("1.2.0", ("1.1", "1.3"), "gone"),
+    ],
+)
+def test_equivalent_release_spellings(mocker, pin, versions, expected):
+    line = luddite.RequirementsLine("pkg=={}".format(pin))
+    worker = mocker.Mock(return_value=versions)
+    assert line.process(worker) == expected
+
+
 def test_empty_line(mocker):
     line = luddite.RequirementsLine("")
     worker = mocker.Mock(side_effect=Exception)

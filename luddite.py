@@ -252,15 +252,16 @@ class RequirementsLine(object):
         else:
             versions_str = ", ".join(index_versions)
             self.from_versions = "(from versions: {})".format(versions_str)
-        if self.version not in index_versions:
+        pinned_version = _safe_version(self.version)
+        if pinned_version is None or pinned_version not in map(_safe_version, index_versions):
             return "gone"
         self.latest = index_versions[-1]
         self.latest_non_pre = max(
             index_versions, key=lambda v: (not Version(v).is_prerelease, Version(v))
         )
-        if self.version == self.latest:
+        if pinned_version == Version(self.latest):
             return "pass"
-        elif self.version == self.latest_non_pre:
+        elif pinned_version == Version(self.latest_non_pre):
             return "warn"
         else:
             return "fail"

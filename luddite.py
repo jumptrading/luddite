@@ -270,7 +270,7 @@ class RequirementsFile(object):
     def __init__(self, fname):
         self.fname = fname
         self.lines = self.parse()
-        self.width = max(len(line.text) for line in self.lines)
+        self.width = max(len(line.text) for line in self.lines) if self.lines else 0
 
     def parse(self):
         with open(str(self.fname)) as f:

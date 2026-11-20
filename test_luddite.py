@@ -96,6 +96,15 @@ def test_parse_reqs_file(tmpdir):
     assert [line.text for line in file.lines] == ["abc==1.0\n", "def==2.0"]
 
 
+def test_parse_empty_reqs_file(tmpdir):
+    reqs = tmpdir.join("reqs.txt")
+    reqs.write("")
+    file = luddite.RequirementsFile(reqs)
+    assert file.index is None
+    assert file.lines == []
+    assert file.width == 0
+
+
 def test_parse_reqs_file_with_index(tmpdir):
     reqs = tmpdir.join("reqs.txt")
     reqs.write("--index http://myindex\nabc==1.0\ndef==2.0")
